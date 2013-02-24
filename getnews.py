@@ -1,11 +1,25 @@
 import xml.etree.ElementTree as ET
-tree = ET.parse('news.xml')
-root = tree.getroot()
+import requests
 
-channel = root.find('channel')
+rsslist = []
+feeds = ['http://www.11alive.com/rss/local/3/10.xml','http://www.nba.com/bucks/rss.xml','http://www.python.org/channews.rdf']
 
-for item in channel.findall('item'):
-    title = item.find('title').text
-    description = item.find('description').text
-    link = item.find('link').text
-    print title, description, link
+for feed in feeds:
+	rsslist.append(requests.get(feed))
+
+for rss in rsslist:
+	root = ET.fromstring(rss.text.encode('utf-8'))	
+	items = root.findall('channel/item')
+	# print items
+	news = []
+	for item in items[:3]:
+		link = item.find('link')
+		if not link:
+			link = item.find('guid')
+		news.append((item.find('title').text, link.text))
+	print news
+
+
+
+
+
